@@ -388,8 +388,23 @@ function exportCSV() {
 
 // ─── Sidebar toggle ───────────────────────────────────────────
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-  document.querySelector('.main-area').classList.toggle('sidebar-collapsed');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobile-overlay');
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    sidebar.classList.toggle('mobile-open');
+    if (overlay) overlay.classList.toggle('active');
+  } else {
+    sidebar.classList.toggle('collapsed');
+    document.querySelector('.main-area').classList.toggle('sidebar-collapsed');
+  }
+}
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  const overlay = document.getElementById('mobile-overlay');
+  if (overlay) overlay.classList.remove('active');
 }
 
 // ─── Theme toggle ─────────────────────────────────────────────
