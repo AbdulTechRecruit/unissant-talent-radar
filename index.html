@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unissant Talent Radar | Open Requisitions</title>
+  <meta name="description" content="Unissant recruiting team's internal dashboard for current open requisitions across AI/ML, Automation/QA, Cloud/DevSecOps, Engineering, and Program Management.">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- PWA Theme & Status Bar -->
+  <meta name="theme-color" content="#2dd4a8" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#0e8a7d" media="(prefers-color-scheme: light)">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- iOS / Safari PWA support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Unissant Radar">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ─── Unissant-specific additions ───────────────────────── */
+    .track-aiml      { background: rgba(59,130,246,0.18); color: #7cb9ff; border: 1px solid rgba(59,130,246,0.3); }
+    .track-qa        { background: rgba(234,179,8,0.15); color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+    .track-cloud     { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .track-engineering { background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+    .track-leadership{ background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .track-intern    { background: rgba(107,114,128,0.2); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
+    .track-corporate { background: rgba(45,212,168,0.15); color: #2dd4a8; border: 1px solid rgba(45,212,168,0.3); }
+
+    .clr-none          { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .clr-public-trust  { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+    .clr-dhs           { background: rgba(234,179,8,0.15); color: #fbbf24; }
+    .clr-cbp           { background: rgba(249,115,22,0.15); color: #fb923c; }
+    .clr-ts            { background: rgba(239,68,68,0.15); color: #f87171; }
+    .clr-tssci-poly    { background: rgba(168,85,247,0.2); color: #c084fc; }
+    .clr-other         { background: rgba(107,114,128,0.2); color: #9ca3af; }
+
+    .lvl-badge { font-size: 0.7rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.03em; }
+    .lvl-intern    { background: rgba(107,114,128,0.2); color: #9ca3af; }
+    .lvl-mid       { background: rgba(59,130,246,0.18); color: #7cb9ff; }
+    .lvl-senior    { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .lvl-principal { background: rgba(234,179,8,0.15); color: #fbbf24; }
+    .lvl-executive { background: rgba(239,68,68,0.15); color: #f87171; }
+
+    .contingent-tag { display: inline-block; margin-left: 6px; font-size: 0.65rem; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: rgba(234,179,8,0.12); color: #fbbf24; border: 1px solid rgba(234,179,8,0.2); vertical-align: middle; letter-spacing: 0.04em; }
+
+    .td-contract { font-size: 0.78rem; color: var(--color-text-muted); max-width: 150px; line-height: 1.3; }
+    .contract-label { display: block; }
+    .td-skills { max-width: 180px; overflow: hidden; }
+    .skills-preview { font-size: 0.78rem; color: var(--color-text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 176px; }
+    .skills-more { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+    .td-exp { font-size: 0.78rem; color: var(--color-text-muted); max-width: 150px; line-height: 1.3; white-space: normal; }
+    .td-location { font-size: 0.85rem; white-space: nowrap; max-width: 160px; }
+
+    .kpi-card.tssci { border-color: rgba(168,85,247,0.3); }
+    .kpi-card.tssci .kpi-value { color: #c084fc; }
+
+    .detail-alert {
+      background: rgba(234,179,8,0.1);
+      border: 1px solid rgba(234,179,8,0.25);
+      color: #fbbf24;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+
+    .gs-legend { display: none; } /* hide GS legend — not applicable */
+
+    /* Level guide bar */
+    .level-legend {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .level-legend-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      margin-right: 0.5rem;
+      white-space: nowrap;
+    }
+    .level-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--color-text-muted); white-space: nowrap; }
+    .level-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    [data-theme="light"] .skills-preview,
+    [data-theme="light"] .td-contract,
+    [data-theme="light"] .td-exp { color: var(--color-text-muted); }
+
+    .closed-section { margin-top: 2rem; }
+    .closed-count { font-size: 0.8rem; font-weight: 600; background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 10px; margin-left: 0.5rem; vertical-align: middle; }
+    .closed-table td { opacity: 0.75; }
+    .closed-date-col { color: #f87171; font-weight: 600; white-space: nowrap; }
+    .days-open { font-size: 0.78rem; color: var(--color-text-muted); font-family: var(--font-mono, monospace); }
+    .closed-row td { text-decoration: none; }
+    .closed-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); letter-spacing: 0.04em; }
+    .archive-link { font-size: 0.78rem; color: var(--color-text-muted); text-decoration: underline; text-decoration-color: rgba(255,255,255,0.15); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <svg aria-label="Unissant" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="28" height="28" rx="6" fill="url(#unissant-grad)"/>
+            <text x="14" y="19" text-anchor="middle" font-family="'DM Sans', sans-serif" font-weight="700" font-size="15" fill="white">U</text>
+            <defs><linearGradient id="unissant-grad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#0e8a7d"/><stop offset="1" stop-color="#2dd4a8"/></linearGradient></defs>
+          </svg>
+          <span class="logo-text">Unissant Talent Radar</span>
+        </div>
+        <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-label">By Track</div>
+        <ul role="list">
+          <li><button class="nav-item active" data-track="all" onclick="filterTrack('all', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            All Tracks
+            <span class="nav-count" id="count-all">—</span>
+          </button></li>
+          <li><button class="nav-item" data-track="aiml" onclick="filterTrack('aiml', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            AI / ML
+            <span class="nav-count" id="count-aiml">—</span>
+          </button></li>
+          <li><button class="nav-item" data-track="qa" onclick="filterTrack('qa', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Automation / QA
+            <span class="nav-count" id="count-qa">—</span>
+          </button></li>
+          <li><button class="nav-item" data-track="cloud" onclick="filterTrack('cloud', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+            Cloud / DevSecOps
+            <span class="nav-count" id="count-cloud">—</span>
+          </button></li>
+          <li><button class="nav-item" data-track="engineering" onclick="filterTrack('engineering', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Engineering
+            <span class="nav-count" id="count-engineering">—</span>
+          </button></li>
+          <li><button class="nav-item" data-track="leadership" onclick="filterTrack('leadership', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Program Mgmt
+            <span class="nav-count" id="count-leadership">—</span>
+          </button></li>
+          <li><button class="nav-item" data-track="corporate" onclick="filterTrack('corporate', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Corporate
+            <span class="nav-count" id="count-corporate">—</span>
+          </button></li>
+          <li><button class="nav-item" data-track="intern" onclick="filterTrack('intern', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+            Intern
+            <span class="nav-count" id="count-intern">—</span>
+          </button></li>
+        </ul>
+
+        <div class="nav-label" style="margin-top:1.5rem">Filters</div>
+        <div class="filter-group">
+          <label class="filter-checkbox">
+            <input type="checkbox" id="filter-remote" onchange="applyFilters()">
+            <span class="checkmark"></span>
+            Remote / 100% Remote
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="filter-no-clearance" onchange="applyFilters()">
+            <span class="checkmark"></span>
+            No Clearance Required
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="filter-not-contingent" onchange="applyFilters()">
+            <span class="checkmark"></span>
+            Exclude Contingent Roles
+          </label>
+        </div>
+
+        <div class="nav-label" style="margin-top:1.5rem">Clearance Level</div>
+        <div class="filter-group">
+          <select id="filter-clearance" class="filter-select" onchange="applyFilters()">
+            <option value="">All clearance levels</option>
+            <option value="none">None / US Citizenship</option>
+            <option value="public-trust">Public Trust</option>
+            <option value="dhs">Active DHS</option>
+            <option value="cbp-bi">CBP BI / DHS CBP</option>
+            <option value="ts">TS / SCI</option>
+            <option value="tssci-poly">TS/SCI + Polygraph</option>
+          </select>
+        </div>
+
+        <div class="sidebar-logo-block">
+          <img src="unissant-logo.svg" alt="Unissant" class="sidebar-brand-logo" />
+        </div>
+
+        <div class="nav-label" style="margin-top:1rem">Experience Level</div>
+        <div class="filter-group">
+          <select id="filter-level" class="filter-select" onchange="applyFilters()">
+            <option value="">All levels</option>
+            <option value="intern">Intern</option>
+            <option value="mid">Mid-Senior (3–7 yr)</option>
+            <option value="senior">Senior (7–12 yr)</option>
+            <option value="principal">Principal / Staff (12+ yr)</option>
+            <option value="executive">Executive / VP (15+ yr)</option>
+          </select>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-meta">Unissant, Inc. — Recruiting Intelligence</div>
+        <div class="footer-meta">Source: unissant.applicantpro.com</div>
+        <div class="footer-meta">Updated April 2, 2026 &bull; 18 open reqs</div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="main-area">
+      <!-- Top bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="search-wrap">
+            <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-input" id="search-input" placeholder="Search roles, skills, locations, contracts…" oninput="applyFilters()" autocomplete="off">
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span class="result-count" id="result-count">Loading…</span>
+          <button class="btn-export" onclick="exportCSV()" title="Export to spreadsheet">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+      </header>
+
+      <!-- KPI strip -->
+      <section class="kpi-strip" id="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-total">—</div>
+          <div class="kpi-label">Open Requisitions</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-remote">—</div>
+          <div class="kpi-label">Fully Remote</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-no-clearance">—</div>
+          <div class="kpi-label">Public Trust or Below</div>
+        </div>
+        <div class="kpi-card tssci">
+          <div class="kpi-value" id="kpi-tssci">—</div>
+          <div class="kpi-label">TS/SCI + Poly Roles</div>
+        </div>
+        <div class="kpi-card urgent">
+          <div class="kpi-value" id="kpi-contingent">—</div>
+          <div class="kpi-label">Contingent on Award</div>
+        </div>
+      </section>
+
+      <!-- Level legend bar -->
+      <section class="level-legend">
+        <div class="level-legend-title">Level Guide</div>
+        <div class="level-item"><div class="level-dot" style="background:#9ca3af"></div>Intern</div>
+        <div class="level-item"><div class="level-dot" style="background:#7cb9ff"></div>Mid-Senior (3–7 yr)</div>
+        <div class="level-item"><div class="level-dot" style="background:#4ade80"></div>Senior (7–12 yr)</div>
+        <div class="level-item"><div class="level-dot" style="background:#fbbf24"></div>Principal / Staff (12+ yr)</div>
+        <div class="level-item"><div class="level-dot" style="background:#f87171"></div>Executive / VP (15+ yr)</div>
+      </section>
+
+      <!-- Active filters display -->
+      <div class="active-filters" id="active-filters"></div>
+
+      <!-- Scrollable content: table + reference sections -->
+      <div class="scroll-content">
+
+        <!-- Table -->
+        <div class="table-wrapper">
+          <table class="jobs-table" id="jobs-table">
+            <thead>
+              <tr>
+                <th class="th-sortable" onclick="sortBy('title')" data-col="title">Role <span class="sort-icon">↕</span></th>
+                <th class="th-sortable" onclick="sortBy('location')" data-col="location">Location <span class="sort-icon">↕</span></th>
+                <th class="th-sortable" onclick="sortBy('track')" data-col="track">Track <span class="sort-icon">↕</span></th>
+                <th>Clearance</th>
+                <th>Work Type</th>
+                <th>Contract / Program</th>
+                <th>Key Skills</th>
+                <th class="th-sortable" onclick="sortBy('date_posted')" data-col="date_posted">Posted <span class="sort-icon">↓</span></th>
+                <th>Experience</th>
+                <th>Apply</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-tbody">
+              <tr><td colspan="10" class="loading-cell">Loading open requisitions…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Clearance guide reference -->
+        <section class="hire-guide">
+          <h2 class="section-title">Clearance Level Reference</h2>
+          <div class="hire-grid" id="clearance-grid"></div>
+          <p class="guide-note">Source: Unissant open requisitions as of April 2, 2026. Clearance timelines are estimates — current holders always preferred. Contingent roles require clearance at time of contract award. Compiled by Unissant Talent Acquisition.</p>
+        </section>
+
+        <!-- Track guide -->
+        <section class="path-guide">
+          <h2 class="section-title">Open Roles by Career Track</h2>
+          <div class="path-grid" id="path-grid"></div>
+        </section>
+
+        <!-- Closed positions log -->
+        <section class="closed-section" id="closed-section">
+          <h2 class="section-title">Closed Positions <span class="closed-count" id="closed-count"></span></h2>
+          <p class="guide-note" style="margin-bottom:1rem">Roles removed from the Unissant careers site. Closed date is recorded automatically each time the sync detects a position was taken down.</p>
+          <div class="table-wrapper">
+            <table class="jobs-table closed-table" id="closed-table">
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Location</th>
+                  <th>Track</th>
+                  <th>Clearance</th>
+                  <th>Work Type</th>
+                  <th>Contract / Program</th>
+                  <th>Posted</th>
+                  <th class="closed-date-col">Closed Date</th>
+                  <th>Days Open</th>
+                  <th>Posting</th>
+                </tr>
+              </thead>
+              <tbody id="closed-tbody">
+                <tr><td colspan="10" class="no-results" style="color:var(--color-text-muted);font-size:0.85rem">No closed positions recorded yet. The sync will log roles here automatically when they are removed from the careers site.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div><!-- /scroll-content -->
+
+      <!-- Detail drawer -->
+      <div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+        <div class="detail-drawer" id="detail-drawer">
+          <button class="detail-close" onclick="closeDetailPanel()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <div id="detail-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Service Worker registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Unissant Radar SW registered:', reg.scope))
+          .catch(err => console.warn('SW registration failed:', err));
+      });
+    }
+  </script>
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script></body>
+</html>
